@@ -1,9 +1,15 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
-import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
+import { Link } from '@inertiajs/react'
+import {
+    BookOpen,
+    FileUp,
+    FolderGit2,
+    LayoutGrid,
+    MessageSquare,
+} from 'lucide-react'
+import AppLogo from '@/components/app-logo'
+import { NavFooter } from '@/components/nav-footer'
+import { NavMain } from '@/components/nav-main'
+import { NavUser } from '@/components/nav-user'
 import {
     Sidebar,
     SidebarContent,
@@ -12,9 +18,9 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
+} from '@/components/ui/sidebar'
+import { dashboard } from '@/routes'
+import type { NavItem } from '@/types'
 
 const mainNavItems: NavItem[] = [
     {
@@ -22,7 +28,17 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
-];
+    {
+        title: 'Documents',
+        href: '/documents',
+        icon: FileUp,
+    },
+    {
+        title: 'Chat',
+        href: '/chat',
+        icon: MessageSquare,
+    },
+]
 
 const footerNavItems: NavItem[] = [
     {
@@ -35,7 +51,7 @@ const footerNavItems: NavItem[] = [
         href: 'https://laravel.com/docs/starter-kits#react',
         icon: BookOpen,
     },
-];
+]
 
 export function AppSidebar() {
     return (
@@ -61,5 +77,5 @@ export function AppSidebar() {
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
-    );
+    )
 }

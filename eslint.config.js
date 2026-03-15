@@ -1,11 +1,11 @@
-import js from '@eslint/js';
-import stylistic from '@stylistic/eslint-plugin';
-import prettier from 'eslint-config-prettier/flat';
-import importPlugin from 'eslint-plugin-import';
-import react from 'eslint-plugin-react';
-import reactHooks from 'eslint-plugin-react-hooks';
-import globals from 'globals';
-import typescript from 'typescript-eslint';
+import js from '@eslint/js'
+import stylistic from '@stylistic/eslint-plugin'
+import prettier from 'eslint-config-prettier/flat'
+import importPlugin from 'eslint-plugin-import'
+import react from 'eslint-plugin-react'
+import reactHooks from 'eslint-plugin-react-hooks'
+import globals from 'globals'
+import typescript from 'typescript-eslint'
 
 const controlStatements = [
     'if',
@@ -16,13 +16,13 @@ const controlStatements = [
     'switch',
     'try',
     'throw',
-];
+]
 const paddingAroundControl = [
     ...controlStatements.flatMap((stmt) => [
         { blankLine: 'always', prev: '*', next: stmt },
         { blankLine: 'always', prev: stmt, next: '*' },
     ]),
-];
+]
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -124,8 +124,8 @@ export default [
             '@stylistic': stylistic,
         },
         rules: {
-            curly: ['error', 'all'],
             '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: false }],
+            '@stylistic/semi': ['error', 'never'],
         },
     },
-];
+]

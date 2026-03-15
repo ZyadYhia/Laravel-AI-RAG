@@ -1,7 +1,7 @@
-import { Link } from '@inertiajs/react';
-import AppLogoIcon from '@/components/app-logo-icon';
-import { home } from '@/routes';
-import type { AuthLayoutProps } from '@/types';
+import { Link } from '@inertiajs/react'
+import AppLogoIcon from '@/components/app-logo-icon'
+import { home } from '@/routes'
+import type { AuthLayoutProps } from '@/types'
 
 export default function AuthSimpleLayout({
     children,
@@ -34,5 +34,5 @@ export default function AuthSimpleLayout({
                 </div>
             </div>
         </div>
-    );
+    )
 }

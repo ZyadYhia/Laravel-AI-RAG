@@ -1,12 +1,12 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { dashboard, login, register } from '@/routes';
+import { Head, Link, usePage } from '@inertiajs/react'
+import { dashboard, login, register } from '@/routes'
 
 export default function Welcome({
     canRegister = true,
 }: {
-    canRegister?: boolean;
+    canRegister?: boolean
 }) {
-    const { auth } = usePage().props;
+    const { auth } = usePage().props
 
     return (
         <>
@@ -803,5 +803,5 @@ export default function Welcome({
                 <div className="hidden h-14.5 lg:block"></div>
             </div>
         </>
-    );
+    )
 }
