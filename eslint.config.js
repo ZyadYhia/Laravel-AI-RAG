@@ -124,8 +124,8 @@ export default [
             '@stylistic': stylistic,
         },
         rules: {
-            curly: ['error', 'all'],
             '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: false }],
+            '@stylistic/semi': ['error', 'never'],
         },
     },
 ];
