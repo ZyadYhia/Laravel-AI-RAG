@@ -1,10 +1,13 @@
 <?php
 
 use App\AI\Services\OllamaEmbeddingService;
+use App\Events\DocumentsEmbedded;
+use App\Events\DocumentsEmbedding;
 use App\Jobs\EmbedDocumentChunks;
 use App\Models\Document;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 
 test('guests cannot access documents page', function () {
@@ -88,6 +91,8 @@ test('document upload dispatches embed job', function () {
 });
 
 test('embed document chunks job creates documents with batch embeddings', function () {
+    Event::fake();
+
     $user = User::factory()->create();
     $chunks = ['chunk one content here', 'chunk two content here'];
     $fakeEmbeddings = [
@@ -109,4 +114,16 @@ test('embed document chunks job creates documents with batch embeddings', functi
     expect(Document::where('user_id', $user->id)->count())->toBe(2);
     expect(Document::where('chunk_index', 0)->first()->content)->toBe('chunk one content here');
     expect(Document::where('chunk_index', 1)->first()->content)->toBe('chunk two content here');
+
+    Event::assertDispatched(DocumentsEmbedding::class, function ($event) use ($user) {
+        return $event->userId === $user->id
+            && $event->source === 'test.txt'
+            && $event->totalChunks === 2;
+    });
+
+    Event::assertDispatched(DocumentsEmbedded::class, function ($event) use ($user) {
+        return $event->userId === $user->id
+            && $event->source === 'test.txt'
+            && $event->chunks === 2;
+    });
 });

@@ -1,6 +1,6 @@
 import { Head, router, usePage } from '@inertiajs/react'
 import { FileUp, Trash2, Upload } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
     store,
@@ -34,10 +34,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 export default function DocumentsIndex({ documents }: PageProps) {
-    const { props } = usePage()
-    const status = (props as Record<string, unknown>).status as
-        | string
-        | undefined
+    const { flash, props } = usePage()
+    const { auth } = props
+    let flashData = flash as Record<string, string> | undefined
     const [uploading, setUploading] = useState(false)
     const [dragOver, setDragOver] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -59,8 +58,6 @@ export default function DocumentsIndex({ documents }: PageProps) {
             data: formData,
             forceFormData: true,
             onFinish: () => {
-                setUploading(false)
-
                 if (input) input.value = ''
             },
         })
@@ -85,13 +82,34 @@ export default function DocumentsIndex({ documents }: PageProps) {
         }
     }
 
+    const userId = auth.user.id
+
+    useEffect(() => {
+        const channel = window.Echo.private(`user.${userId}`)
+
+        channel.listen('DocumentsEmbedding', () => {
+            setUploading(true)
+        })
+
+        channel.listen('DocumentsEmbedded', () => {
+            router.reload()
+            flashData = undefined
+            setUploading(false)
+        })
+
+        return () => {
+            channel.stopListening('DocumentsEmbedding')
+            channel.stopListening('DocumentsEmbedded')
+        }
+    }, [userId])
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Documents" />
             <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4">
-                {status && (
+                {flashData?.status && (
                     <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
-                        {status}
+                        {flashData.status}
                     </div>
                 )}
 

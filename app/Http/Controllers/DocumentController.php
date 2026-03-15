@@ -24,7 +24,7 @@ class DocumentController extends Controller
             ->latest()
             ->get()
             ->groupBy('source')
-            ->map(fn($chunks, $source) => [
+            ->map(fn ($chunks, $source) => [
                 'source' => $source,
                 'chunks' => $chunks->count(),
                 'uploaded_at' => $chunks->first()->created_at->toDateTimeString(),
@@ -55,7 +55,7 @@ class DocumentController extends Controller
             $totalChunks += count($chunks);
         }
 
-        return back()->with('status', "Processing {$totalChunks} chunks from " . count($files) . ' file(s). They will appear shortly.');
+        return Inertia::flash('status', "Processing {$totalChunks} chunks from ".count($files).' file(s). They will appear shortly.')->back();
     }
 
     /**
@@ -68,6 +68,6 @@ class DocumentController extends Controller
             ->where('source', $source)
             ->delete();
 
-        return back()->with('status', "Deleted all chunks from {$source}.");
+        return Inertia::flash('status', "Deleted all chunks from {$source}.")->back();
     }
 }
