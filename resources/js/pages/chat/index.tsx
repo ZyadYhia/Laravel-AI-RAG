@@ -3,6 +3,7 @@ import { AlertCircle, Bot, Send, User } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 
+import { store } from '@/actions/App/Http/Controllers/ChatController'
 import { Button } from '@/components/ui/button'
 import AppLayout from '@/layouts/app-layout'
 import type { BreadcrumbItem } from '@/types'
@@ -45,8 +46,10 @@ export default function ChatIndex({ hasDocuments }: PageProps) {
         setLoading(true)
 
         try {
-            const response = await fetch('/chat', {
-                method: 'POST',
+            const { url, method } = store()
+
+            const response = await fetch(url, {
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     'X-XSRF-TOKEN': getCsrfToken(),
@@ -62,22 +65,28 @@ export default function ChatIndex({ hasDocuments }: PageProps) {
             if (!response.ok) {
                 const errorBody = await response.text()
                 console.error('Chat error:', response.status, errorBody)
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        role: 'assistant',
+                        content:
+                            'Sorry, something went wrong. Please try again.',
+                    },
+                ])
+            } else {
+                const data = await response.json()
 
-                throw new Error(`Request failed: ${response.status}`)
-            }
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        role: 'assistant',
+                        content: data.text || 'No response received.',
+                    },
+                ])
 
-            const data = await response.json()
-
-            setMessages((prev) => [
-                ...prev,
-                {
-                    role: 'assistant',
-                    content: data.text || 'No response received.',
-                },
-            ])
-
-            if (data.conversationId) {
-                setConversationId(data.conversationId)
+                if (data.conversationId) {
+                    setConversationId(data.conversationId)
+                }
             }
         } catch (error) {
             console.error('Chat error:', error)
@@ -88,10 +97,10 @@ export default function ChatIndex({ hasDocuments }: PageProps) {
                     content: 'Sorry, something went wrong. Please try again.',
                 },
             ])
-        } finally {
-            setLoading(false)
-            inputRef.current?.focus()
         }
+
+        setLoading(false)
+        inputRef.current?.focus()
     }
 
     function getCsrfToken(): string {

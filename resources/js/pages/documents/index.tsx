@@ -2,6 +2,10 @@ import { Head, router, usePage } from '@inertiajs/react'
 import { FileUp, Trash2, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
+import {
+    store,
+    destroy,
+} from '@/actions/App/Http/Controllers/DocumentController'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -50,7 +54,9 @@ export default function DocumentsIndex({ documents }: PageProps) {
         })
 
         setUploading(true)
-        router.post('/documents', formData, {
+        router.visit(store.url(), {
+            method: 'post',
+            data: formData,
             forceFormData: true,
             onFinish: () => {
                 setUploading(false)
@@ -63,7 +69,9 @@ export default function DocumentsIndex({ documents }: PageProps) {
     function handleDelete(source: string) {
         if (!confirm(`Delete all chunks from "${source}"?`)) return
 
-        router.delete(`/documents/${encodeURIComponent(source)}`)
+        router.visit(destroy.url(source), {
+            method: 'delete',
+        })
     }
 
     function handleDrop(e: React.DragEvent) {
