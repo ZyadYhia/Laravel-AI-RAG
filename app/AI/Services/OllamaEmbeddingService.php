@@ -3,7 +3,8 @@
 namespace App\AI\Services;
 
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
+use Laravel\Ai\Embeddings;
+use Laravel\Ai\Enums\Lab;
 use RuntimeException;
 
 class OllamaEmbeddingService
@@ -43,25 +44,13 @@ class OllamaEmbeddingService
     public function embedMany(array $texts): array
     {
         try {
-            $response = Http::timeout(120)
-                ->post("{$this->baseUrl}/api/embed", [
-                    'model' => $this->model,
-                    'input' => $texts,
-                ]);
+            $response = Embeddings::for($texts)
+                ->dimensions($this->dimensions)
+                ->generate(Lab::Ollama, $this->model);
         } catch (ConnectionException $e) {
             throw new RuntimeException("Cannot connect to Ollama at {$this->baseUrl}. Ensure Ollama is running.", previous: $e);
         }
 
-        if ($response->failed()) {
-            throw new RuntimeException("Ollama embedding request failed: {$response->body()}");
-        }
-
-        $data = $response->json();
-
-        if (! isset($data['embeddings'])) {
-            throw new RuntimeException('Unexpected Ollama response: missing embeddings key.');
-        }
-
-        return $data['embeddings'];
+        return $response->embeddings;
     }
 }
