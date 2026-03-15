@@ -1,8 +1,14 @@
 <?php
 
+use App\AI\Services\OllamaEmbeddingService;
+use App\Events\DocumentsEmbedded;
+use App\Events\DocumentsEmbedding;
+use App\Jobs\EmbedDocumentChunks;
 use App\Models\Document;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 
 test('guests cannot access documents page', function () {
     $this->get(route('documents.index'))->assertRedirect(route('login'));
@@ -64,4 +70,60 @@ test('users cannot see other users documents', function () {
 
     expect($sources)->toContain('user1.txt')
         ->and($sources)->not->toContain('user2.txt');
+});
+
+test('document upload dispatches embed job', function () {
+    Queue::fake();
+
+    $user = User::factory()->create();
+    $file = UploadedFile::fake()->createWithContent('test.txt', 'Hello world this is a test document.');
+
+    $this->actingAs($user)
+        ->post(route('documents.store'), ['files' => [$file]])
+        ->assertRedirect()
+        ->assertSessionHas('status');
+
+    Queue::assertPushed(EmbedDocumentChunks::class, function ($job) use ($user) {
+        return $job->userId === $user->id
+            && $job->source === 'test.txt'
+            && count($job->chunks) > 0;
+    });
+});
+
+test('embed document chunks job creates documents with batch embeddings', function () {
+    Event::fake();
+
+    $user = User::factory()->create();
+    $chunks = ['chunk one content here', 'chunk two content here'];
+    $fakeEmbeddings = [
+        array_fill(0, 4096, 0.1),
+        array_fill(0, 4096, 0.2),
+    ];
+
+    $embeddingService = Mockery::mock(OllamaEmbeddingService::class);
+    $embeddingService->shouldReceive('embedMany')
+        ->once()
+        ->with($chunks)
+        ->andReturn($fakeEmbeddings);
+
+    $this->app->instance(OllamaEmbeddingService::class, $embeddingService);
+
+    $job = new EmbedDocumentChunks($user->id, $chunks, 'test.txt');
+    $job->handle($embeddingService);
+
+    expect(Document::where('user_id', $user->id)->count())->toBe(2);
+    expect(Document::where('chunk_index', 0)->first()->content)->toBe('chunk one content here');
+    expect(Document::where('chunk_index', 1)->first()->content)->toBe('chunk two content here');
+
+    Event::assertDispatched(DocumentsEmbedding::class, function ($event) use ($user) {
+        return $event->userId === $user->id
+            && $event->source === 'test.txt'
+            && $event->totalChunks === 2;
+    });
+
+    Event::assertDispatched(DocumentsEmbedded::class, function ($event) use ($user) {
+        return $event->userId === $user->id
+            && $event->source === 'test.txt'
+            && $event->chunks === 2;
+    });
 });

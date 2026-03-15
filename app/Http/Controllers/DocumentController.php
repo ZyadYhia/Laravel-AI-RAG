@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\AI\Services\OllamaEmbeddingService;
 use App\AI\Services\TextChunker;
 use App\Http\Requests\DocumentUploadRequest;
+use App\Jobs\EmbedDocumentChunks;
 use App\Models\Document;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,7 +39,7 @@ class DocumentController extends Controller
     /**
      * Upload and embed documents.
      */
-    public function store(DocumentUploadRequest $request, OllamaEmbeddingService $embeddingService): RedirectResponse
+    public function store(DocumentUploadRequest $request): RedirectResponse
     {
         $user = $request->user();
         $files = $request->file('files');
@@ -50,22 +50,12 @@ class DocumentController extends Controller
             $chunks = TextChunker::chunk($text);
             $filename = $file->getClientOriginalName();
 
-            foreach ($chunks as $index => $chunk) {
-                $embedding = $embeddingService->embed($chunk);
+            EmbedDocumentChunks::dispatch($user->id, $chunks, $filename);
 
-                Document::query()->create([
-                    'user_id' => $user->id,
-                    'content' => $chunk,
-                    'embedding' => $embedding,
-                    'source' => $filename,
-                    'chunk_index' => $index,
-                ]);
-
-                $totalChunks++;
-            }
+            $totalChunks += count($chunks);
         }
 
-        return back()->with('status', "Successfully embedded {$totalChunks} chunks from ".count($files).' file(s).');
+        return Inertia::flash('status', "Processing {$totalChunks} chunks from ".count($files).' file(s). They will appear shortly.')->back();
     }
 
     /**
@@ -78,6 +68,6 @@ class DocumentController extends Controller
             ->where('source', $source)
             ->delete();
 
-        return back()->with('status', "Deleted all chunks from {$source}.");
+        return Inertia::flash('status', "Deleted all chunks from {$source}.")->back();
     }
 }

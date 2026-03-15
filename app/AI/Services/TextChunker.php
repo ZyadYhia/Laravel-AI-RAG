@@ -2,6 +2,7 @@
 
 namespace App\AI\Services;
 
+use Smalot\PdfParser\Config;
 use Smalot\PdfParser\Parser;
 
 class TextChunker
@@ -58,10 +59,16 @@ class TextChunker
     protected static function extractPdfText(string $path): string
     {
         if (class_exists(Parser::class)) {
-            $parser = new Parser;
-            $pdf = $parser->parseFile($path);
+            try {
+                $config = new Config;
+                $config->setIgnoreEncryption(true);
+                $parser = new Parser([], $config);
+                $pdf = $parser->parseFile($path);
 
-            return $pdf->getText();
+                return $pdf->getText();
+            } catch (\Exception) {
+                return file_get_contents($path);
+            }
         }
 
         return file_get_contents($path);
