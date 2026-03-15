@@ -1,26 +1,26 @@
-import { Form, Head } from '@inertiajs/react';
-import { REGEXP_ONLY_DIGITS } from 'input-otp';
-import { useMemo, useState } from 'react';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Form, Head } from '@inertiajs/react'
+import { REGEXP_ONLY_DIGITS } from 'input-otp'
+import { useMemo, useState } from 'react'
+import InputError from '@/components/input-error'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
     InputOTP,
     InputOTPGroup,
     InputOTPSlot,
-} from '@/components/ui/input-otp';
-import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
-import AuthLayout from '@/layouts/auth-layout';
-import { store } from '@/routes/two-factor/login';
+} from '@/components/ui/input-otp'
+import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth'
+import AuthLayout from '@/layouts/auth-layout'
+import { store } from '@/routes/two-factor/login'
 
 export default function TwoFactorChallenge() {
-    const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false);
-    const [code, setCode] = useState<string>('');
+    const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false)
+    const [code, setCode] = useState<string>('')
 
     const authConfigContent = useMemo<{
-        title: string;
-        description: string;
-        toggleText: string;
+        title: string
+        description: string
+        toggleText: string
     }>(() => {
         if (showRecoveryInput) {
             return {
@@ -28,7 +28,7 @@ export default function TwoFactorChallenge() {
                 description:
                     'Please confirm access to your account by entering one of your emergency recovery codes.',
                 toggleText: 'login using an authentication code',
-            };
+            }
         }
 
         return {
@@ -36,14 +36,14 @@ export default function TwoFactorChallenge() {
             description:
                 'Enter the authentication code provided by your authenticator application.',
             toggleText: 'login using a recovery code',
-        };
-    }, [showRecoveryInput]);
+        }
+    }, [showRecoveryInput])
 
     const toggleRecoveryMode = (clearErrors: () => void): void => {
-        setShowRecoveryInput(!showRecoveryInput);
-        clearErrors();
-        setCode('');
-    };
+        setShowRecoveryInput(!showRecoveryInput)
+        clearErrors()
+        setCode('')
+    }
 
     return (
         <AuthLayout
@@ -127,5 +127,5 @@ export default function TwoFactorChallenge() {
                 </Form>
             </div>
         </AuthLayout>
-    );
+    )
 }

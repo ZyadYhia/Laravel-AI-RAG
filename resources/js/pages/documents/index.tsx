@@ -1,79 +1,79 @@
-import { Head, router, usePage } from '@inertiajs/react';
-import { FileUp, Trash2, Upload } from 'lucide-react';
-import { useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import { Head, router, usePage } from '@inertiajs/react'
+import { FileUp, Trash2, Upload } from 'lucide-react'
+import { useRef, useState } from 'react'
+import type { FormEvent } from 'react'
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button'
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
+} from '@/components/ui/card'
+import AppLayout from '@/layouts/app-layout'
+import type { BreadcrumbItem } from '@/types'
 
 type DocumentGroup = {
-    source: string;
-    chunks: number;
-    uploaded_at: string;
-};
+    source: string
+    chunks: number
+    uploaded_at: string
+}
 
 type PageProps = {
-    documents: DocumentGroup[];
-};
+    documents: DocumentGroup[]
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Documents', href: '/documents' },
-];
+]
 
 export default function DocumentsIndex({ documents }: PageProps) {
-    const { props } = usePage();
+    const { props } = usePage()
     const status = (props as Record<string, unknown>).status as
         | string
-        | undefined;
-    const [uploading, setUploading] = useState(false);
-    const [dragOver, setDragOver] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+        | undefined
+    const [uploading, setUploading] = useState(false)
+    const [dragOver, setDragOver] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     function handleUpload(e: FormEvent) {
-        e.preventDefault();
-        const input = fileInputRef.current;
+        e.preventDefault()
+        const input = fileInputRef.current
 
-        if (!input?.files?.length) return;
+        if (!input?.files?.length) return
 
-        const formData = new FormData();
+        const formData = new FormData()
         Array.from(input.files).forEach((file) => {
-            formData.append('files[]', file);
-        });
+            formData.append('files[]', file)
+        })
 
-        setUploading(true);
+        setUploading(true)
         router.post('/documents', formData, {
             forceFormData: true,
             onFinish: () => {
-                setUploading(false);
+                setUploading(false)
 
-                if (input) input.value = '';
+                if (input) input.value = ''
             },
-        });
+        })
     }
 
     function handleDelete(source: string) {
-        if (!confirm(`Delete all chunks from "${source}"?`)) return;
+        if (!confirm(`Delete all chunks from "${source}"?`)) return
 
-        router.delete(`/documents/${encodeURIComponent(source)}`);
+        router.delete(`/documents/${encodeURIComponent(source)}`)
     }
 
     function handleDrop(e: React.DragEvent) {
-        e.preventDefault();
-        setDragOver(false);
-        const input = fileInputRef.current;
+        e.preventDefault()
+        setDragOver(false)
+        const input = fileInputRef.current
 
         if (input && e.dataTransfer.files.length) {
-            input.files = e.dataTransfer.files;
-            handleUpload(e as unknown as FormEvent);
+            input.files = e.dataTransfer.files
+            handleUpload(e as unknown as FormEvent)
         }
     }
 
@@ -105,8 +105,8 @@ export default function DocumentsIndex({ documents }: PageProps) {
                                         : 'border-muted-foreground/25 hover:border-primary/50'
                                 }`}
                                 onDragOver={(e) => {
-                                    e.preventDefault();
-                                    setDragOver(true);
+                                    e.preventDefault()
+                                    setDragOver(true)
                                 }}
                                 onDragLeave={() => setDragOver(false)}
                                 onDrop={handleDrop}
@@ -126,7 +126,7 @@ export default function DocumentsIndex({ documents }: PageProps) {
                                         if (e.target.files?.length) {
                                             handleUpload(
                                                 e as unknown as FormEvent,
-                                            );
+                                            )
                                         }
                                     }}
                                 />
@@ -187,5 +187,5 @@ export default function DocumentsIndex({ documents }: PageProps) {
                 </Card>
             </div>
         </AppLayout>
-    );
+    )
 }

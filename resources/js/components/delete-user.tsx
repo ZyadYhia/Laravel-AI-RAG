@@ -1,10 +1,10 @@
-import { Form } from '@inertiajs/react';
-import { useRef } from 'react';
-import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
-import { Button } from '@/components/ui/button';
+import { Form } from '@inertiajs/react'
+import { useRef } from 'react'
+import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController'
+import Heading from '@/components/heading'
+import InputError from '@/components/input-error'
+import PasswordInput from '@/components/password-input'
+import { Button } from '@/components/ui/button'
 import {
     Dialog,
     DialogClose,
@@ -13,11 +13,11 @@ import {
     DialogFooter,
     DialogTitle,
     DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 
 export default function DeleteUser() {
-    const passwordInput = useRef<HTMLInputElement>(null);
+    const passwordInput = useRef<HTMLInputElement>(null)
 
     return (
         <div className="space-y-6">
@@ -116,5 +116,5 @@ export default function DeleteUser() {
                 </Dialog>
             </div>
         </div>
-    );
+    )
 }

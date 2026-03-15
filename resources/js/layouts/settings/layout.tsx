@@ -1,14 +1,14 @@
-import { Link } from '@inertiajs/react';
-import type { PropsWithChildren } from 'react';
-import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { useCurrentUrl } from '@/hooks/use-current-url';
-import { cn, toUrl } from '@/lib/utils';
-import { edit as editAppearance } from '@/routes/appearance';
-import { edit } from '@/routes/profile';
-import { edit as editSecurity } from '@/routes/security';
-import type { NavItem } from '@/types';
+import { Link } from '@inertiajs/react'
+import type { PropsWithChildren } from 'react'
+import Heading from '@/components/heading'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { useCurrentUrl } from '@/hooks/use-current-url'
+import { cn, toUrl } from '@/lib/utils'
+import { edit as editAppearance } from '@/routes/appearance'
+import { edit } from '@/routes/profile'
+import { edit as editSecurity } from '@/routes/security'
+import type { NavItem } from '@/types'
 
 const sidebarNavItems: NavItem[] = [
     {
@@ -26,14 +26,14 @@ const sidebarNavItems: NavItem[] = [
         href: editAppearance(),
         icon: null,
     },
-];
+]
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
-    const { isCurrentOrParentUrl } = useCurrentUrl();
+    const { isCurrentOrParentUrl } = useCurrentUrl()
 
     // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {
-        return null;
+        return null
     }
 
     return (
@@ -79,5 +79,5 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                 </div>
             </div>
         </div>
-    );
+    )
 }

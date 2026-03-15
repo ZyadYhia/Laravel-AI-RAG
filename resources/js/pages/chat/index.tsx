@@ -1,48 +1,48 @@
-import { Head } from '@inertiajs/react';
-import { AlertCircle, Bot, Send, User } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import { Head } from '@inertiajs/react'
+import { AlertCircle, Bot, Send, User } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import type { FormEvent } from 'react'
 
-import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
+import { Button } from '@/components/ui/button'
+import AppLayout from '@/layouts/app-layout'
+import type { BreadcrumbItem } from '@/types'
 
 type Message = {
-    role: 'user' | 'assistant';
-    content: string;
-};
+    role: 'user' | 'assistant'
+    content: string
+}
 
 type PageProps = {
-    hasDocuments: boolean;
-};
+    hasDocuments: boolean
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Chat', href: '/chat' },
-];
+]
 
 export default function ChatIndex({ hasDocuments }: PageProps) {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [input, setInput] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [conversationId, setConversationId] = useState<string | null>(null);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLTextAreaElement>(null);
+    const [messages, setMessages] = useState<Message[]>([])
+    const [input, setInput] = useState('')
+    const [loading, setLoading] = useState(false)
+    const [conversationId, setConversationId] = useState<string | null>(null)
+    const messagesEndRef = useRef<HTMLDivElement>(null)
+    const inputRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages])
 
     async function handleSubmit(e: FormEvent) {
-        e.preventDefault();
-        const trimmed = input.trim();
+        e.preventDefault()
+        const trimmed = input.trim()
 
-        if (!trimmed || loading) return;
+        if (!trimmed || loading) return
 
-        const userMessage: Message = { role: 'user', content: trimmed };
-        setMessages((prev) => [...prev, userMessage]);
-        setInput('');
-        setLoading(true);
+        const userMessage: Message = { role: 'user', content: trimmed }
+        setMessages((prev) => [...prev, userMessage])
+        setInput('')
+        setLoading(true)
 
         try {
             const response = await fetch('/chat', {
@@ -57,16 +57,16 @@ export default function ChatIndex({ hasDocuments }: PageProps) {
                     conversation_id: conversationId,
                 }),
                 credentials: 'same-origin',
-            });
+            })
 
             if (!response.ok) {
-                const errorBody = await response.text();
-                console.error('Chat error:', response.status, errorBody);
+                const errorBody = await response.text()
+                console.error('Chat error:', response.status, errorBody)
 
-                throw new Error(`Request failed: ${response.status}`);
+                throw new Error(`Request failed: ${response.status}`)
             }
 
-            const data = await response.json();
+            const data = await response.json()
 
             setMessages((prev) => [
                 ...prev,
@@ -74,36 +74,36 @@ export default function ChatIndex({ hasDocuments }: PageProps) {
                     role: 'assistant',
                     content: data.text || 'No response received.',
                 },
-            ]);
+            ])
 
             if (data.conversationId) {
-                setConversationId(data.conversationId);
+                setConversationId(data.conversationId)
             }
         } catch (error) {
-            console.error('Chat error:', error);
+            console.error('Chat error:', error)
             setMessages((prev) => [
                 ...prev,
                 {
                     role: 'assistant',
                     content: 'Sorry, something went wrong. Please try again.',
                 },
-            ]);
+            ])
         } finally {
-            setLoading(false);
-            inputRef.current?.focus();
+            setLoading(false)
+            inputRef.current?.focus()
         }
     }
 
     function getCsrfToken(): string {
-        const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/)
 
-        return match ? decodeURIComponent(match[1]) : '';
+        return match ? decodeURIComponent(match[1]) : ''
     }
 
     function handleKeyDown(e: React.KeyboardEvent) {
         if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSubmit(e as unknown as FormEvent);
+            e.preventDefault()
+            handleSubmit(e as unknown as FormEvent)
         }
     }
 
@@ -205,5 +205,5 @@ export default function ChatIndex({ hasDocuments }: PageProps) {
                 </div>
             </div>
         </AppLayout>
-    );
+    )
 }
