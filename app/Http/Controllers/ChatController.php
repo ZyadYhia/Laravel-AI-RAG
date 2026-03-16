@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\AI\Agents\RagAgent;
 use App\AI\Services\OllamaEmbeddingService;
 use App\Http\Requests\ChatRequest;
+use App\Models\AgentConversation;
 use App\Models\Document;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Laravel\Ai\Contracts\ConversationStore;
+use Laravel\Ai\Messages\Message;
 
 class ChatController extends Controller
 {
@@ -24,6 +27,38 @@ class ChatController extends Controller
 
         return Inertia::render('chat/index', [
             'hasDocuments' => $hasDocuments,
+            'conversationId' => null,
+            'initialMessages' => [],
+            'conversationTitle' => null,
+        ]);
+    }
+
+    /**
+     * Display the chat page with a specific conversation loaded.
+     */
+    public function show(Request $request, string $conversation, ConversationStore $store): Response
+    {
+        $userId = $request->user()->id;
+
+        $conv = AgentConversation::query()
+            ->where('user_id', $userId)
+            ->findOrFail($conversation);
+
+        $messages = $store->getLatestConversationMessages($conversation, 100)
+            ->filter(fn (Message $m) => in_array($m->role->value, ['user', 'assistant']))
+            ->map(fn (Message $m) => ['role' => $m->role->value, 'content' => $m->content])
+            ->values()
+            ->all();
+
+        $hasDocuments = Document::query()
+            ->where('user_id', $userId)
+            ->exists();
+
+        return Inertia::render('chat/index', [
+            'hasDocuments' => $hasDocuments,
+            'conversationId' => $conv->id,
+            'initialMessages' => $messages,
+            'conversationTitle' => $conv->title,
         ]);
     }
 
