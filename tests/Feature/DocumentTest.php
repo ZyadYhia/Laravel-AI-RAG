@@ -81,7 +81,7 @@ test('document upload dispatches embed job', function () {
     $this->actingAs($user)
         ->post(route('documents.store'), ['files' => [$file]])
         ->assertRedirect()
-        ->assertSessionHas('status');
+        ->assertInertiaFlash('status');
 
     Queue::assertPushed(EmbedDocumentChunks::class, function ($job) use ($user) {
         return $job->userId === $user->id
