@@ -4,7 +4,6 @@ namespace App\AI\Agents;
 
 use App\Models\User;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Model;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Attributes\Timeout;
@@ -15,13 +14,17 @@ use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 
 #[Provider(Lab::Ollama)]
-#[Model('llama3.2:1b')]
 #[MaxTokens(4096)]
 #[Temperature(0.3)]
 #[Timeout(120)]
 class RagAgent implements Agent, Conversational
 {
     use Promptable, RemembersConversations;
+
+    public function model(): string
+    {
+        return config('ai.ollama_model');
+    }
 
     public function __construct(
         public User $user,
@@ -42,9 +45,9 @@ class RagAgent implements Agent, Conversational
         INSTRUCTIONS;
 
         if ($this->context !== '') {
-            return $base."\n\n--- DOCUMENT CONTEXT ---\n".$this->context."\n--- END CONTEXT ---";
+            return $base . "\n\n--- DOCUMENT CONTEXT ---\n" . $this->context . "\n--- END CONTEXT ---";
         }
 
-        return $base."\n\nNo documents were found matching the user's query. Let them know and answer generally if possible.";
+        return $base . "\n\nNo documents were found matching the user's query. Let them know and answer generally if possible.";
     }
 }

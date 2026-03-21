@@ -5,6 +5,7 @@ import type { FormEvent } from 'react'
 import {
     store,
     destroy,
+    toggleEnabled,
 } from '@/actions/App/Http/Controllers/DocumentController'
 
 import { Button } from '@/components/ui/button'
@@ -15,12 +16,14 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
 import AppLayout from '@/layouts/app-layout'
 import type { BreadcrumbItem } from '@/types'
 
 type DocumentGroup = {
     source: string
     chunks: number
+    is_enabled: boolean
     uploaded_at: string
 }
 
@@ -196,15 +199,31 @@ export default function DocumentsIndex({ documents }: PageProps) {
                                                 </p>
                                             </div>
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() =>
-                                                handleDelete(doc.source)
-                                            }
-                                        >
-                                            <Trash2 className="size-4 text-red-500" />
-                                        </Button>
+                                        <div className="flex items-center gap-2">
+                                            <Switch
+                                                checked={doc.is_enabled}
+                                                onCheckedChange={() =>
+                                                    router.visit(
+                                                        toggleEnabled.url(
+                                                            doc.source,
+                                                        ),
+                                                        { method: 'patch' },
+                                                    )
+                                                }
+                                                size="default"
+                                                aria-label="Toggle document"
+                                                className="hover:cursor-pointer"
+                                            />
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() =>
+                                                    handleDelete(doc.source)
+                                                }
+                                            >
+                                                <Trash2 className="size-5 text-red-500" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

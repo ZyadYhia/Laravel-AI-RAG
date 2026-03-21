@@ -96,6 +96,12 @@ QUEUE_CONNECTION=redis
 BROADCAST_CONNECTION=reverb
 ```
 
+Configure the generative model used by the RAG agent (defaults to `llama3.2:1b`):
+
+```dotenv
+GENERATIVE_MODEL=llama3.2:1b
+```
+
 Add your AI provider API keys as needed:
 
 ```dotenv
@@ -113,10 +119,10 @@ php artisan db:seed
 
 This creates a default test user:
 
-| Field    | Value              |
-|----------|--------------------|
-| Email    | `test@test.com`    |
-| Password | `123123123`        |
+| Field    | Value           |
+| -------- | --------------- |
+| Email    | `test@test.com` |
+| Password | `123123123`     |
 
 ### 7. Build frontend assets
 
@@ -161,14 +167,21 @@ php artisan test
 
 ## Useful Commands
 
-| Command                                                   | Description                |
-| --------------------------------------------------------- | -------------------------- |
+| Command                                                   | Description                           |
+| --------------------------------------------------------- | ------------------------------------- |
 | `composer run dev`                                        | Start all dev services (without Herd) |
-| `composer run dev:broadcasting`                           | Start queue worker & Reverb |
-| `npm run dev`                                             | Vite dev server (hot-reload) |
-| `php artisan test --compact`                              | Run tests (compact output) |
-| `vendor/bin/pint`                                         | Fix code style             |
-| `npm run lint`                                            | Lint frontend code         |
-| `npm run format`                                          | Format frontend code       |
-| `docker compose -f ai-rag-stack/docker-compose.yml up -d` | Start Docker services      |
-| `docker compose -f ai-rag-stack/docker-compose.yml down`  | Stop Docker services       |
+| `composer run dev:broadcasting`                           | Start queue worker & Reverb           |
+| `npm run dev`                                             | Vite dev server (hot-reload)          |
+| `php artisan test --compact`                              | Run tests (compact output)            |
+| `vendor/bin/pint`                                         | Fix code style                        |
+| `npm run lint`                                            | Lint frontend code                    |
+| `npm run format`                                          | Format frontend code                  |
+| `docker compose -f ai-rag-stack/docker-compose.yml up -d` | Start Docker services                 |
+| `docker compose -f ai-rag-stack/docker-compose.yml down`  | Stop Docker services                  |
+
+## Dev Tools
+
+| Tool              | Route         | Description                                                           |
+| ----------------- | ------------- | --------------------------------------------------------------------- |
+| Laravel Telescope | `/telescope`  | Debug assistant — requests, queries, jobs, exceptions, logs, and more |
+| Log Viewer        | `/log-viewer` | Browse and search Laravel log files                                   |

@@ -20,13 +20,14 @@ class DocumentController extends Controller
     {
         $documents = Document::query()
             ->where('user_id', $request->user()->id)
-            ->select('id', 'source', 'chunk_index', 'created_at')
+            ->select('id', 'source', 'chunk_index', 'is_enabled', 'created_at')
             ->latest()
             ->get()
             ->groupBy('source')
             ->map(fn ($chunks, $source) => [
                 'source' => $source,
                 'chunks' => $chunks->count(),
+                'is_enabled' => $chunks->first()->is_enabled,
                 'uploaded_at' => $chunks->first()->created_at->toDateTimeString(),
             ])
             ->values();
@@ -69,5 +70,23 @@ class DocumentController extends Controller
             ->delete();
 
         return Inertia::flash('status', "Deleted all chunks from {$source}.")->back();
+    }
+
+    /**
+     * Toggle the is_enabled flag for all chunks of a given source.
+     */
+    public function toggleEnabled(Request $request, string $source): RedirectResponse
+    {
+        $documents = Document::query()
+            ->where('user_id', $request->user()->id)
+            ->where('source', $source);
+
+        $isEnabled = ! $documents->first()?->is_enabled;
+
+        $documents->update(['is_enabled' => $isEnabled]);
+
+        $status = $isEnabled ? 'enabled' : 'disabled';
+
+        return Inertia::flash('status', "Document '{$source}' {$status}.")->back();
     }
 }

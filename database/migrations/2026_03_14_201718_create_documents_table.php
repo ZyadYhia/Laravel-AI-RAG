@@ -31,6 +31,7 @@ return new class extends Migration
 
             $table->string('source')->nullable();
             $table->unsignedInteger('chunk_index')->default(0);
+            $table->boolean('is_enabled')->default(true);
             $table->timestamps();
         });
     }

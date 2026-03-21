@@ -9,6 +9,7 @@ use App\Models\AgentConversation;
 use App\Models\Document;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Ai\Contracts\ConversationStore;
@@ -23,6 +24,7 @@ class ChatController extends Controller
     {
         $hasDocuments = Document::query()
             ->where('user_id', $request->user()->id)
+            ->where('is_enabled', true)
             ->exists();
 
         return Inertia::render('chat/index', [
@@ -45,13 +47,14 @@ class ChatController extends Controller
             ->findOrFail($conversation);
 
         $messages = $store->getLatestConversationMessages($conversation, 100)
-            ->filter(fn (Message $m) => in_array($m->role->value, ['user', 'assistant']))
-            ->map(fn (Message $m) => ['role' => $m->role->value, 'content' => $m->content])
+            ->filter(fn(Message $m) => in_array($m->role->value, ['user', 'assistant']))
+            ->map(fn(Message $m) => ['role' => $m->role->value, 'content' => $m->content])
             ->values()
             ->all();
 
         $hasDocuments = Document::query()
             ->where('user_id', $userId)
+            ->where('is_enabled', true)
             ->exists();
 
         return Inertia::render('chat/index', [
@@ -98,16 +101,17 @@ class ChatController extends Controller
 
         $documents = Document::query()
             ->where('user_id', $userId)
+            ->where('is_enabled', true)
             ->whereVectorSimilarTo('embedding', $queryEmbedding, minSimilarity: 0.3)
             ->limit(5)
             ->get();
-
+        Log::info('Retrieved ' . count($documents) . ' relevant documents for query: ' . $query);
         if ($documents->isEmpty()) {
             return '';
         }
 
         return $documents
-            ->map(fn (Document $doc) => "[Source: {$doc->source}, chunk {$doc->chunk_index}]\n{$doc->content}")
+            ->map(fn(Document $doc) => "[Source: {$doc->source}, chunk {$doc->chunk_index}]\n{$doc->content}")
             ->implode("\n\n---\n\n");
     }
 }
