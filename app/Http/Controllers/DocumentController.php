@@ -24,7 +24,7 @@ class DocumentController extends Controller
             ->latest()
             ->get()
             ->groupBy('source')
-            ->map(fn ($chunks, $source) => [
+            ->map(fn($chunks, $source) => [
                 'source' => $source,
                 'chunks' => $chunks->count(),
                 'is_enabled' => $chunks->first()->is_enabled,
@@ -48,7 +48,12 @@ class DocumentController extends Controller
 
         foreach ($files as $file) {
             $text = TextChunker::extractText($file->getRealPath(), $file->getClientOriginalExtension());
-            $chunks = TextChunker::chunk($text);
+            $chunks = TextChunker::chunk(
+                text: $text,
+                filename: $file->getClientOriginalName(),
+                chunkSize: 800,
+                overlapSentences: 1
+            );
             $filename = $file->getClientOriginalName();
 
             EmbedDocumentChunks::dispatch($user->id, $chunks, $filename);
@@ -56,7 +61,7 @@ class DocumentController extends Controller
             $totalChunks += count($chunks);
         }
 
-        return Inertia::flash('status', "Processing {$totalChunks} chunks from ".count($files).' file(s). They will appear shortly.')->back();
+        return Inertia::flash('status', "Processing {$totalChunks} chunks from " . count($files) . ' file(s). They will appear shortly.')->back();
     }
 
     /**
