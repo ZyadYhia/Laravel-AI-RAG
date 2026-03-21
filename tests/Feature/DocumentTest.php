@@ -53,6 +53,64 @@ test('users can delete their own documents', function () {
     expect(Document::where('user_id', $user->id)->count())->toBe(0);
 });
 
+test('users can toggle document enabled status', function () {
+    $user = User::factory()->create();
+    Document::factory()->count(2)->create([
+        'user_id' => $user->id,
+        'source' => 'toggle-test.txt',
+        'is_enabled' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->patch(route('documents.toggle', 'toggle-test.txt'))
+        ->assertRedirect();
+
+    expect(Document::where('source', 'toggle-test.txt')->first()->is_enabled)->toBeFalse();
+
+    $this->actingAs($user)
+        ->patch(route('documents.toggle', 'toggle-test.txt'))
+        ->assertRedirect();
+
+    expect(Document::where('source', 'toggle-test.txt')->first()->is_enabled)->toBeTrue();
+});
+
+test('users cannot toggle other users documents', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    Document::factory()->create([
+        'user_id' => $user2->id,
+        'source' => 'other.txt',
+        'is_enabled' => true,
+    ]);
+
+    $this->actingAs($user1)
+        ->patch(route('documents.toggle', 'other.txt'));
+
+    expect(Document::where('source', 'other.txt')->first()->is_enabled)->toBeTrue();
+});
+
+test('documents index includes is_enabled flag', function () {
+    $user = User::factory()->create();
+    Document::factory()->create([
+        'user_id' => $user->id,
+        'source' => 'enabled.txt',
+        'is_enabled' => true,
+    ]);
+    Document::factory()->create([
+        'user_id' => $user->id,
+        'source' => 'disabled.txt',
+        'is_enabled' => false,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('documents.index'));
+
+    $documents = collect($response->original->getData()['page']['props']['documents']);
+
+    expect($documents->firstWhere('source', 'enabled.txt')['is_enabled'])->toBeTrue();
+    expect($documents->firstWhere('source', 'disabled.txt')['is_enabled'])->toBeFalse();
+});
+
 test('users cannot see other users documents', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();

@@ -21,6 +21,7 @@ class DocumentFactory extends Factory
             'embedding' => array_map(fn () => fake()->randomFloat(6, -1, 1), range(1, 4096)),
             'source' => fake()->word().'.txt',
             'chunk_index' => 0,
+            'is_enabled' => true,
         ];
     }
 }

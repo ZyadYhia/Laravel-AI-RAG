@@ -16,6 +16,7 @@ class Document extends Model
         'embedding',
         'source',
         'chunk_index',
+        'is_enabled',
     ];
 
     protected function casts(): array
@@ -23,6 +24,7 @@ class Document extends Model
         return [
             'embedding' => 'array',
             'chunk_index' => 'integer',
+            'is_enabled' => 'boolean',
         ];
     }
 

@@ -14,6 +14,7 @@ return [
     */
 
     'default' => 'ollama',
+    'ollama_model' => env('GENERATIVE_MODEL', 'llama3.2:1b'),
     'default_for_images' => 'gemini',
     'default_for_audio' => 'openai',
     'default_for_transcription' => 'openai',
